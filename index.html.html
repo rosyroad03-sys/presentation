@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920">
+<title>여행 준비 서비스 발표</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root {
+  --bg:#080810;--bg2:#0d0d18;--surface:#111120;--surface2:#181828;
+  --border:#252535;--text:#e8e8f2;--muted:#5a5a78;--muted2:#9090b8;
+  --orange:#ff6b2b;--yellow:#f5c842;--green:#00d9a3;
+  --blue:#38b6ff;--purple:#a855f7;--red:#ff4757;
+  --og:0 0 28px rgba(255,107,43,.6),0 0 70px rgba(255,107,43,.2);
+  --yg:0 0 28px rgba(245,200,66,.6),0 0 70px rgba(245,200,66,.2);
+  --gg:0 0 28px rgba(0,217,163,.6),0 0 70px rgba(0,217,163,.2);
+  --bg-glow:0 0 28px rgba(56,182,255,.6),0 0 70px rgba(56,182,255,.2);
+  --pg:0 0 28px rgba(168,85,247,.6),0 0 70px rgba(168,85,247,.2);
+  --rg:0 0 28px rgba(255,71,87,.6),0 0 70px rgba(255,71,87,.2);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);}
+body{font-family:'Pretendard',sans-serif;color:var(--text);-webkit-font-smoothing:antialiased;}
+
+/* ENGINE */
+.deck{width:1920px;height:1080px;position:relative;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .4s ease;}
+.slide.active{opacity:1;pointer-events:all;}
+
+/* NAV */
+.nav{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:14px;background:rgba(13,13,24,.88);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:40px;padding:10px 24px;z-index:999;}
+.nav-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--muted2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s;}
+.nav-btn:hover{border-color:var(--orange);color:var(--orange);}
+.nav-counter{font-family:'Pretendard',sans-serif;font-size:13px;color:var(--muted);min-width:64px;text-align:center;letter-spacing:.04em;}
+.nav-progress{width:130px;height:2px;background:var(--border);border-radius:2px;overflow:hidden;}
+.nav-progress-fill{height:100%;background:var(--orange);border-radius:2px;transition:width .4s ease;}
+
+/* PART BADGE */
+.part-badge{font-family:'Pretendard',sans-serif;font-size:13px;font-weight:600;letter-spacing:.12em;padding:5px 14px;border-radius:4px;display:inline-block;}
+.pb-orange{background:rgba(255,107,43,.12);color:var(--orange);border:1px solid rgba(255,107,43,.3);}
+.pb-yellow{background:rgba(245,200,66,.12);color:var(--yellow);border:1px solid rgba(245,200,66,.3);}
+.pb-green{background:rgba(0,217,163,.12);color:var(--green);border:1px solid rgba(0,217,163,.3);}
+.pb-blue{background:rgba(56,182,255,.12);color:var(--blue);border:1px solid rgba(56,182,255,.3);}
+.pb-purple{background:rgba(168,85,247,.12);color:var(--purple);border:1px solid rgba(168,85,247,.3);}
+
+/* STEP REVEAL */
+.step{opacity:0;transform:translateY(20px);transition:opacity .45s ease,transform .45s ease;}
+.step.show{opacity:1;transform:translateY(0);}
+
+/* GLOW TEXT */
+.g-orange{color:var(--orange);text-shadow:var(--og);}
+.g-yellow{color:var(--yellow);text-shadow:var(--yg);}
+.g-green{color:var(--green);text-shadow:var(--gg);}
+.g-blue{color:var(--blue);text-shadow:var(--bg-glow);}
+.g-purple{color:var(--purple);text-shadow:var(--pg);}
+.g-red{color:var(--red);text-shadow:var(--rg);}
+
+/* LAYOUT */
+.slide-inner{flex:1;display:flex;flex-direction:column;padding:56px 96px 72px;position:relative;overflow:hidden;}
+.slide-header{margin-bottom:40px;}
+.slide-title{font-size:52px;font-weight:800;line-height:1.15;letter-spacing:-.025em;}
+.slide-subtitle{font-size:22px;color:var(--muted2);margin-top:10px;font-weight:300;}
+.slide-body{flex:1;display:flex;gap:60px;align-items:flex-start;}
+.col-left{flex:1;}
+.col-right{flex:1;}
+.col-full{width:100%;}
+.deco-line{width:52px;height:4px;border-radius:2px;margin-bottom:22px;}
+
+/* TOP PROGRESS BAR */
+.top-bar{height:3px;width:100%;background:var(--border);position:relative;flex-shrink:0;}
+.top-bar-fill{position:absolute;left:0;top:0;height:100%;background:var(--orange);transition:width .4s ease;}
+
+/* BG */
+.bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.014) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.014) 1px,transparent 1px);background-size:80px 80px;pointer-events:none;}
+.bg-spot{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none;}
+
+/* SLIDE NUM */
+.slide-num{position:absolute;right:96px;bottom:32px;font-family:'Pretendard',sans-serif;font-size:13px;color:var(--muted);letter-spacing:.06em;}
+
+/* ── BAR CHART ── */
+.bar-chart{display:flex;flex-direction:column;gap:22px;}
+.bar-row{display:flex;align-items:center;gap:18px;}
+.bar-label{font-size:18px;font-weight:500;color:var(--muted2);width:220px;text-align:right;flex-shrink:0;line-height:1.3;}
+.bar-track{flex:1;background:rgba(255,255,255,.06);border-radius:6px;height:18px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:6px;width:0;transition:width 1.1s cubic-bezier(.22,.68,0,1.2);}
+.bar-pct{font-family:'Pretendard',sans-serif;font-size:18px;font-weight:700;width:56px;flex-shrink:0;}
+
+/* ── BIG STAT ── */
+.big-stat{font-family:'Pretendard',sans-serif;font-weight:900;line-height:1;}
+.bs-label{font-size:20px;color:var(--muted2);margin-top:10px;font-weight:400;}
+
+/* ── FUNNEL ── */
+.funnel{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.funnel-step{display:flex;align-items:center;justify-content:center;border-radius:6px;height:62px;font-size:18px;font-weight:600;transition:all .6s ease;}
+.funnel-arrow{color:var(--muted);font-size:22px;text-align:center;width:100%;}
+
+/* ── FLOW NODES ── */
+.flow{display:flex;align-items:center;flex-wrap:wrap;gap:10px;}
+.fn{padding:10px 22px;border-radius:8px;font-size:17px;font-weight:600;white-space:nowrap;}
+.fa{color:var(--muted);font-size:18px;}
+
+/* ── STEP CARD ── */
+.step-cards{display:flex;flex-direction:column;gap:16px;}
+.sc{display:flex;align-items:flex-start;gap:20px;padding:22px 28px;background:rgba(255,255,255,.028);border-radius:10px;border-left:4px solid;}
+.sc-num{font-family:'Pretendard',sans-serif;font-size:14px;font-weight:700;letter-spacing:.1em;margin-top:3px;flex-shrink:0;}
+.sc-text{font-size:19px;font-weight:500;line-height:1.55;}
+.sc-sub{font-size:16px;color:var(--muted2);margin-top:6px;font-weight:400;}
+
+/* ── METRIC GRID ── */
+.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.mg{padding:20px 24px;background:rgba(255,255,255,.03);border-radius:10px;border:1px solid var(--border);}
+.mg-name{font-family:'Pretendard',sans-serif;font-size:14px;font-weight:700;color:var(--muted2);margin-bottom:8px;letter-spacing:.06em;}
+.mg-desc{font-size:16px;line-height:1.5;font-weight:500;}
+
+/* ── COMPARE ── */
+.compare{display:flex;gap:18px;}
+.cmp{flex:1;padding:24px 26px;border-radius:10px;}
+.cmp-adopt{background:rgba(0,217,163,.06);border:1px solid rgba(0,217,163,.25);}
+.cmp-reject{background:rgba(90,90,120,.06);border:1px solid rgba(90,90,120,.2);}
+.cmp-title{font-family:'Pretendard',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;margin-bottom:14px;}
+.cmp-item{font-size:16px;line-height:2.1;color:var(--text);}
+.cmp-reject .cmp-item{color:var(--muted2);}
+
+/* ── FORMULA ── */
+.formula{background:#070710;border:1px solid rgba(168,85,247,.3);border-radius:12px;padding:28px 34px;font-family:'Pretendard',sans-serif;font-size:20px;font-weight:600;color:var(--purple);text-shadow:var(--pg);line-height:2.4;}
+
+/* ── QUOTE ── */
+.quote{padding:22px 30px;background:rgba(255,107,43,.06);border-left:4px solid var(--orange);border-radius:0 10px 10px 0;font-size:20px;line-height:1.7;color:var(--text);}
+
+/* ── BUBBLES ── */
+.bubbles{display:flex;align-items:flex-end;justify-content:center;gap:24px;}
+.bub{border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;flex-shrink:0;}
+.bub-val{font-family:'Pretendard',sans-serif;font-weight:800;}
+.bub-lbl{font-size:14px;color:rgba(255,255,255,.55);margin-top:3px;}
+
+/* ── LOOP DIAGRAM ── */
+.loop-diagram{display:flex;flex-direction:column;gap:18px;}
+.loop-row{padding:20px 28px;border-radius:10px;border:1px solid;}
+.loop-label{font-family:'Pretendard',sans-serif;font-size:13px;font-weight:700;letter-spacing:.12em;margin-bottom:10px;}
+.loop-flow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.lf-node{padding:7px 18px;border-radius:22px;font-size:16px;font-weight:700;}
+.lf-arrow{color:var(--muted);font-size:16px;}
+
+/* slide-opening */
+.slide-opening .bg-spot:nth-child(1){width:600px;height:600px;background:var(--orange);top:-100px;right:-100px;opacity:.09;}
+.slide-opening .bg-spot:nth-child(2){width:400px;height:400px;background:var(--blue);bottom:-60px;left:180px;opacity:.07;}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<!-- ▓▓ 01 OPENING ▓▓ -->
+<div class="slide slide-opening" data-steps="3">
+  <div class="bg-grid"></div><div class="bg-spot"></div><div class="bg-spot"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner" style="justify-content:center;align-items:flex-start;padding-top:140px;">
+    <div class="part-badge pb-orange step" style="margin-bottom:30px;">PART 01 · 시장조사</div>
+    <div class="step" style="font-size:76px;font-weight:900;line-height:1.15;letter-spacing:-.03em;max-width:1000px;">
+      여행이 확정된 이후에도,<br><span class="g-orange">준비는 왜 이렇게 힘든가?</span>
+    </div>
+    <div class="step" style="font-size:26px;color:var(--muted2);margin-top:36px;font-weight:300;line-height:1.8;">
+      비행기 티켓도 끊었고, 숙소도 예약했어요.<br>설레는 마음에 바로 준비를 시작하려고 하는데…
+    </div>
+  </div>
+  <div class="slide-num">01 / 34</div>
+</div>
+
+<!-- ▓▓ 02 채널 분산 ▓▓ -->
+<div class="slide" data-steps="4">
+  <div class="bg-grid"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="deco-line" style="background:var(--orange);"></div>
+      <div class="slide-title">막상 뭐부터 해야 할지 모르겠는 거예요.</div>
+    </div>
+    <div class="slide-body" style="align-items:center;gap:80px;">
+      <div class="col-left" style="display:flex;flex-direction:column;gap:22px;">
+        <div class="step" style="background:rgba(3,199,90,.12);border:1px solid rgba(3,199,90,.3);color:#03c75a;font-size:24px;font-weight:600;padding:18px 28px;border-radius:10px;">📝&nbsp;&nbsp;네이버 블로그 탭 열고</div>
+        <div class="step" style="background:rgba(255,68,68,.12);border:1px solid rgba(255,68,68,.3);color:#ff5e5e;font-size:24px;font-weight:600;padding:18px 28px;border-radius:10px;">▶&nbsp;&nbsp;유튜브 탭 열고</div>
+        <div class="step" style="background:rgba(200,100,220,.12);border:1px solid rgba(200,100,220,.3);color:#e879f9;font-size:24px;font-weight:600;padding:18px 28px;border-radius:10px;">📸&nbsp;&nbsp;인스타그램도 열고</div>
+      </div>
+      <div class="col-right step">
+        <div class="g-orange" style="font-size:72px;font-weight:900;line-height:1.1;margin-bottom:18px;">스크린샷만<br>쌓여가고</div>
+        <div style="font-size:24px;color:var(--muted2);">정작 짐은 아직 하나도 못 쌌고.</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">02 / 34</div>
+</div>
+
+<!-- ▓▓ 03 문제 선언 ▓▓ -->
+<div class="slide" data-steps="1">
+  <div class="bg-grid"></div>
+  <div class="bg-spot" style="width:560px;height:560px;background:var(--orange);top:50%;left:50%;transform:translate(-50%,-50%);opacity:.08;filter:blur(130px);"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner" style="justify-content:center;align-items:center;">
+    <div class="step" style="text-align:center;">
+      <div style="font-size:26px;color:var(--muted2);margin-bottom:22px;font-weight:300;">저희가 주목한 문제</div>
+      <div style="font-size:72px;font-weight:900;line-height:1.2;letter-spacing:-.025em;">"정보는 넘쳐나는데,<br><span class="g-orange">연결이 안 된다"</span></div>
+      <div style="font-size:22px;color:var(--muted2);margin-top:30px;font-weight:300;">탐색 → 구조화 → 실제 준비 행동으로 이어지는 과정에서 비용이 발생한다</div>
+    </div>
+  </div>
+  <div class="slide-num">03 / 34</div>
+</div>
+
+<!-- ▓▓ 04 문제 가설 ▓▓ -->
+<div class="slide" data-steps="4">
+  <div class="bg-grid"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-orange" style="margin-bottom:18px;">문제 가설 정의</div>
+      <div class="slide-title">누가, 언제, 왜, 어떤 상황에서</div>
+    </div>
+    <div class="step-cards col-full" style="gap:18px;">
+      <div class="sc step" style="border-color:var(--blue);">
+        <div class="sc-num g-blue">WHO</div>
+        <div><div class="sc-text">해외여행을 준비하는 한국인 중, <strong>꼼꼼하게 챙기는 것에 스트레스를 느끼는 효율 지향적 MZ세대</strong></div></div>
+      </div>
+      <div class="sc step" style="border-color:var(--green);">
+        <div class="sc-num g-green">WHEN</div>
+        <div><div class="sc-text">항공과 숙소 예약을 마치고 <strong>본격적으로 짐을 싸기 시작할 때</strong></div></div>
+      </div>
+      <div class="sc step" style="border-color:var(--yellow);">
+        <div class="sc-num g-yellow">WHY</div>
+        <div><div class="sc-text">여행에 필요한 준비물 정보가 <strong>여러 채널에 분산되어 있어서</strong></div></div>
+      </div>
+      <div class="sc step" style="border-color:var(--orange);">
+        <div class="sc-num g-orange">HOW</div>
+        <div><div class="sc-text">정보를 탐색하고 <strong>실제 준비 행동으로 이어지는 과정에서</strong> 비용이 발생한다</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">04 / 34</div>
+</div>
+
+<!-- ▓▓ 05 관측 설계 ▓▓ -->
+<div class="slide" data-steps="3">
+  <div class="bg-grid"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-orange" style="margin-bottom:18px;">가설 검증 방법</div>
+      <div class="slide-title">3가지 방향으로 관측 설계</div>
+    </div>
+    <div class="slide-body" style="gap:32px;align-items:stretch;">
+      <div class="sc step" style="border-color:var(--orange);flex:1;flex-direction:column;align-items:flex-start;padding:32px;">
+        <div style="font-size:48px;margin-bottom:16px;">📋</div>
+        <div class="sc-num g-orange" style="font-size:16px;margin-bottom:10px;">01 · 설문</div>
+        <div class="sc-text">직접 사용자 행동 데이터 수집<br><span class="sc-sub">43~48명 대상, 13문항</span></div>
+      </div>
+      <div class="sc step" style="border-color:var(--blue);flex:1;flex-direction:column;align-items:flex-start;padding:32px;">
+        <div style="font-size:48px;margin-bottom:16px;">👥</div>
+        <div class="sc-num g-blue" style="font-size:16px;margin-bottom:10px;">02 · 여행 커뮤니티</div>
+        <div class="sc-text">실제 탐색 패턴 관찰<br><span class="sc-sub">행동 데이터 기반</span></div>
+      </div>
+      <div class="sc step" style="border-color:var(--green);flex:1;flex-direction:column;align-items:flex-start;padding:32px;">
+        <div style="font-size:48px;margin-bottom:16px;">📊</div>
+        <div class="sc-num g-green" style="font-size:16px;margin-bottom:10px;">03 · 시장 데이터</div>
+        <div class="sc-text">경쟁사 · 가격 · 여행 패턴 분석<br><span class="sc-sub">한국관광공사 · 컨슈머인사이트</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">05 / 34</div>
+</div>
+
+<!-- ▓▓ 06 타겟 세그먼트 ▓▓ -->
+<div class="slide" data-steps="3">
+  <div class="bg-grid"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-orange" style="margin-bottom:18px;">설문 결과 — 타겟 세그먼트 (n=43~48)</div>
+      <div class="slide-title">핵심 타겟이 자연스럽게 모였다</div>
+    </div>
+    <div class="slide-body" style="align-items:center;justify-content:space-around;">
+      <div class="step" style="text-align:center;">
+        <div class="big-stat g-orange" style="font-size:160px;">91%</div>
+        <div class="bs-label">20대 응답자</div>
+      </div>
+      <div class="step" style="text-align:center;">
+        <div class="big-stat g-blue" style="font-size:160px;">77%</div>
+        <div class="bs-label">여성 응답자</div>
+      </div>
+      <div class="step" style="text-align:center;">
+        <div class="big-stat g-green" style="font-size:160px;">64%</div>
+        <div class="bs-label">일본 여행</div>
+        <div style="font-size:17px;color:var(--muted);margin-top:6px;">동남아 41%</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">06 / 34</div>
+</div>
+
+<!-- ▓▓ 07 탐색 채널 ▓▓ -->
+<div class="slide" data-steps="3">
+  <div class="bg-grid"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-orange" style="margin-bottom:18px;">Store Loop — 탐색 채널 분산</div>
+      <div class="slide-title">한 군데에서 찾는 사람은 거의 없다</div>
+    </div>
+    <div class="slide-body" style="align-items:center;">
+      <div class="col-left">
+        <div class="bar-chart">
+          <div class="bar-row step">
+            <div class="bar-label">네이버 블로그/카페</div>
+            <div class="bar-track"><div class="bar-fill" style="background:var(--green);box-shadow:var(--gg);" data-pct="77"></div></div>
+            <div class="bar-pct g-green">77%</div>
+          </div>
+          <div class="bar-row step">
+            <div class="bar-label">유튜브</div>
+            <div class="bar-track"><div class="bar-fill" style="background:#ff5555;box-shadow:var(--rg);" data-pct="60"></div></div>
+            <div class="bar-pct" style="color:#ff5555;">60%</div>
+          </div>
+          <div class="bar-row step">
+            <div class="bar-label">인스타그램</div>
+            <div class="bar-track"><div class="bar-fill" style="background:var(--purple);box-shadow:var(--pg);" data-pct="53"></div></div>
+            <div class="bar-pct g-purple">53%</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-right step">
+        <div style="padding:32px 36px;background:rgba(255,107,43,.07);border:1px solid rgba(255,107,43,.22);border-radius:14px;">
+          <div style="font-size:20px;color:var(--muted2);margin-bottom:14px;">채널 분산이</div>
+          <div class="g-orange" style="font-size:44px;font-weight:900;line-height:1.2;">구조적으로<br>발생한다</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">07 / 34</div>
+</div>
+
+<!-- ▓▓ 08 저장 방식 ▓▓ -->
+<div class="slide" data-steps="3">
+  <div class="bg-grid"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-orange" style="margin-bottom:18px;">Store Loop — 파편화된 저장</div>
+      <div class="slide-title">하나의 서비스로 관리하는 사람이 없다</div>
+    </div>
+    <div class="slide-body" style="align-items:center;">
+      <div class="col-left">
+        <div class="bar-chart">
+          <div class="bar-row step">
+            <div class="bar-label">메모 앱 (노션 등)</div>
+            <div class="bar-track"><div class="bar-fill" style="background:var(--blue);box-shadow:var(--bg-glow);" data-pct="70"></div></div>
+            <div class="bar-pct g-blue">70%</div>
+          </div>
+          <div class="bar-row step">
+            <div class="bar-label">카카오톡 나에게</div>
+            <div class="bar-track"><div class="bar-fill" style="background:var(--yellow);box-shadow:var(--yg);" data-pct="70"></div></div>
+            <div class="bar-pct g-yellow">70%</div>
+          </div>
+          <div class="bar-row step">
+            <div class="bar-label">스크린샷</div>
+            <div class="bar-track"><div class="bar-fill" style="background:var(--orange);box-shadow:var(--og);" data-pct="65"></div></div>
+            <div class="bar-pct g-orange">65%</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-right step">
+        <div style="padding:32px 36px;background:rgba(255,107,43,.07);border:1px solid rgba(255,107,43,.22);border-radius:14px;">
+          <div style="font-size:20px;color:var(--muted2);margin-bottom:12px;">결론</div>
+          <div class="g-orange" style="font-size:40px;font-weight:900;line-height:1.3;">파편화된 저장</div>
+          <div style="font-size:19px;color:var(--muted2);margin-top:14px;">= 필요할 때 다시 찾아야 함</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">08 / 34</div>
+</div>
+
+<!-- ▓▓ 09 반복 탐색 95% ▓▓ -->
+<div class="slide" data-steps="2">
+  <div class="bg-grid"></div>
+  <div class="bg-spot" style="width:700px;height:700px;background:var(--orange);top:50%;left:50%;transform:translate(-50%,-50%);opacity:.06;filter:blur(150px);"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner" style="justify-content:center;align-items:center;">
+    <div class="step" style="text-align:center;">
+      <div style="font-size:20px;color:var(--muted2);margin-bottom:10px;letter-spacing:.08em;">STORE_R · 반복 탐색 경험률</div>
+      <div class="big-stat g-orange" style="font-size:260px;line-height:1;">95%</div>
+      <div style="font-size:22px;color:var(--muted2);margin-top:14px;">매우 자주 <span class="g-orange">47%</span> + 가끔 <span style="color:var(--yellow);">48%</span></div>
+    </div>
+    <div class="step" style="position:absolute;right:130px;top:50%;transform:translateY(-50%);">
+      <div style="padding:28px 32px;background:rgba(255,107,43,.08);border:1px solid rgba(255,107,43,.25);border-radius:12px;max-width:360px;">
+        <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px;letter-spacing:.1em;">정의</div>
+        <div style="font-size:19px;color:var(--text);line-height:1.7;"><span class="g-orange">Store_R</span> = ReSearch / Search<br><br>동일 준비 과정에서<br>재탐색이 발생한 비율</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">09 / 34</div>
+</div>
+
+<!-- ▓▓ 10 Delay_t ▓▓ -->
+<div class="slide" data-steps="4">
+  <div class="bg-grid"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-orange" style="margin-bottom:18px;">Delay_t — 탐색 시작 → 첫 저장까지</div>
+      <div class="slide-title">시간 비용도 크다</div>
+    </div>
+    <div class="slide-body" style="align-items:center;">
+      <div class="col-left">
+        <div class="bar-chart">
+          <div class="bar-row step">
+            <div class="bar-label" style="color:var(--green);">10분 이내</div>
+            <div class="bar-track"><div class="bar-fill" style="background:var(--green);box-shadow:var(--gg);" data-pct="42"></div></div>
+            <div class="bar-pct g-green">42%</div>
+          </div>
+          <div class="bar-row step">
+            <div class="bar-label">10 ~ 30분</div>
+            <div class="bar-track"><div class="bar-fill" style="background:var(--yellow);" data-pct="30"></div></div>
+            <div class="bar-pct g-yellow">30%</div>
+          </div>
+          <div class="bar-row step">
+            <div class="bar-label">30분 ~ 1시간</div>
+            <div class="bar-track"><div class="bar-fill" style="background:var(--orange);" data-pct="9"></div></div>
+            <div class="bar-pct g-orange">9%</div>
+          </div>
+          <div class="bar-row step">
+            <div class="bar-label" style="color:var(--red);">1시간 이상/여러 날</div>
+            <div class="bar-track"><div class="bar-fill" style="background:var(--red);box-shadow:var(--rg);" data-pct="19"></div></div>
+            <div class="bar-pct g-red">19%</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-right step">
+        <div style="font-size:19px;color:var(--muted2);margin-bottom:18px;">시간이 오래 걸릴수록</div>
+        <div class="g-red" style="font-size:40px;font-weight:800;line-height:1.3;">준비 부담(PB_t)<br>증가</div>
+        <div style="margin-top:22px;font-size:17px;color:var(--muted);">Delay_t = Time(Search→Save) / MaxTime</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">10 / 34</div>
+</div>
+
+<!-- ▓▓ 11 실행 포기 74% ▓▓ -->
+<div class="slide" data-steps="3">
+  <div class="bg-grid"></div>
+  <div class="bg-spot" style="width:650px;height:650px;background:var(--red);top:50%;left:50%;transform:translate(-50%,-50%);opacity:.06;filter:blur(140px);"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-orange" style="margin-bottom:18px;">실행 포기 — 짐 싸기를 시작하지 못하는 이유</div>
+      <div class="slide-title">결국 <span class="g-red">74%</span>가 실행을 포기한다</div>
+    </div>
+    <div class="slide-body" style="align-items:center;">
+      <div class="col-left">
+        <div class="bar-chart">
+          <div class="bar-row step">
+            <div class="bar-label" style="color:var(--red);">그냥 귀찮아서</div>
+            <div class="bar-track"><div class="bar-fill" style="background:var(--red);box-shadow:var(--rg);" data-pct="48"></div></div>
+            <div class="bar-pct g-red">48%</div>
+          </div>
+          <div class="bar-row step">
+            <div class="bar-label">필요한 물건인지 확신 ✕</div>
+            <div class="bar-track"><div class="bar-fill" style="background:var(--orange);" data-pct="19"></div></div>
+            <div class="bar-pct g-orange">19%</div>
+          </div>
+          <div class="bar-row step">
+            <div class="bar-label">리스트가 너무 많아</div>
+            <div class="bar-track"><div class="bar-fill" style="background:var(--orange);" data-pct="19"></div></div>
+            <div class="bar-pct g-orange">19%</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-right" style="display:flex;align-items:center;justify-content:center;">
+        <div class="step" style="text-align:center;">
+          <div class="big-stat g-red" style="font-size:200px;line-height:1;">74%</div>
+          <div style="font-size:22px;color:var(--muted2);margin-top:10px;">실행 포기 합산</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">11 / 34</div>
+</div>
+
+<!-- ▓▓ 12 Backflow 77% ▓▓ -->
+<div class="slide" data-steps="3">
+  <div class="bg-grid"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-orange" style="margin-bottom:18px;">Confirm Loop — Backflow</div>
+      <div class="slide-title">저장해놨는데 <span class="g-red">또</span> 검색하러 간다</div>
+    </div>
+    <div class="slide-body" style="align-items:center;justify-content:space-around;">
+      <div class="step" style="display:flex;flex-direction:column;align-items:center;gap:18px;">
+        <svg width="280" height="280" viewBox="0 0 280 280">
+          <circle cx="140" cy="140" r="112" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="30"/>
+          <circle cx="140" cy="140" r="112" fill="none" stroke="var(--red)" stroke-width="30"
+            stroke-dasharray="497" stroke-dashoffset="114.3"
+            stroke-linecap="round" transform="rotate(-90 140 140)"
+            style="filter:drop-shadow(0 0 14px rgba(255,71,87,.65))"/>
+          <text x="140" y="130" text-anchor="middle" fill="var(--red)" font-family="Pretendard,sans-serif" font-size="66" font-weight="900">77%</text>
+          <text x="140" y="166" text-anchor="middle" fill="#9090b8" font-family="Pretendard,sans-serif" font-size="18" font-weight="500">Backflow</text>
+        </svg>
+        <div style="font-size:18px;color:var(--muted2);text-align:center;">자주 23% + 가끔 54%</div>
+      </div>
+      <div class="col-right" style="display:flex;flex-direction:column;gap:18px;">
+        <div class="step">
+          <div style="font-size:19px;color:var(--muted2);margin-bottom:12px;">Backflow 흐름</div>
+          <div class="flow">
+            <div class="fn" style="background:rgba(56,182,255,.12);border:1px solid rgba(56,182,255,.3);color:var(--blue);">Confirm Loop</div>
+            <div class="fa">→</div>
+            <div class="fn" style="background:rgba(255,71,87,.12);border:1px solid rgba(255,71,87,.3);color:var(--red);">빠진 항목 발견</div>
+            <div class="fa">→</div>
+            <div class="fn" style="background:rgba(255,107,43,.12);border:1px solid rgba(255,107,43,.3);color:var(--orange);">Store Loop 재발동</div>
+          </div>
+        </div>
+        <div class="step" style="padding:24px 28px;background:rgba(255,71,87,.07);border:1px solid rgba(255,71,87,.22);border-radius:10px;">
+          <div style="font-size:14px;font-weight:700;color:var(--muted);margin-bottom:10px;letter-spacing:.1em;">정의</div>
+          <div style="font-size:18px;color:var(--text);line-height:1.7;">Backflow = <span class="g-red">ReStoreTrigger</span> / SavedListOpen<br><br>저장만으론 준비가 완료되지 않는다는 것을 의미</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">12 / 34</div>
+</div>
+
+<!-- ▓▓ 13 카테고리 수용도 83% ▓▓ -->
+<div class="slide" data-steps="2">
+  <div class="bg-grid"></div>
+  <div class="bg-spot" style="width:650px;height:650px;background:var(--green);top:50%;left:50%;transform:translate(-50%,-50%);opacity:.06;filter:blur(140px);"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner" style="justify-content:center;align-items:center;">
+    <div class="step" style="text-align:center;">
+      <div style="font-size:20px;color:var(--muted);margin-bottom:12px;letter-spacing:.08em;">카테고리 자동 분류 서비스 수용 의향</div>
+      <div class="big-stat g-green" style="font-size:260px;line-height:1;">83%</div>
+    </div>
+    <div class="step" style="position:absolute;right:130px;top:50%;transform:translateY(-50%);">
+      <div style="padding:30px 36px;background:rgba(0,217,163,.08);border:1px solid rgba(0,217,163,.25);border-radius:14px;max-width:380px;">
+        <div style="font-size:18px;color:var(--muted2);margin-bottom:10px;">이게 의미하는 것</div>
+        <div class="g-green" style="font-size:28px;font-weight:700;line-height:1.4;">저희 솔루션 방향의<br>명확한 수요 확인</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">13 / 34</div>
+</div>
+
+<!-- ▓▓ 14 시장 데이터 ▓▓ -->
+<div class="slide" data-steps="3">
+  <div class="bg-grid"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-orange" style="margin-bottom:18px;">시장 데이터 — 한국관광공사 · 컨슈머인사이트 2025~2026</div>
+      <div class="slide-title">구조적인 문제임을 시장 데이터가 확인</div>
+    </div>
+    <div class="slide-body" style="align-items:center;justify-content:space-around;">
+      <div class="step" style="text-align:center;">
+        <div class="big-stat g-orange" style="font-size:110px;">2,270만</div>
+        <div class="bs-label">2024 해외 출국자</div>
+        <div style="font-size:17px;color:var(--muted);margin-top:6px;">일본/동남아 64%</div>
+      </div>
+      <div class="step" style="text-align:center;">
+        <div class="big-stat g-blue" style="font-size:110px;">80%</div>
+        <div class="bs-label">2030 여성 자유여행 비율</div>
+        <div style="font-size:17px;color:var(--muted);margin-top:6px;">핵심 타겟</div>
+      </div>
+      <div class="step" style="text-align:center;">
+        <div class="big-stat g-red" style="font-size:110px;">96%</div>
+        <div class="bs-label">반복 탐색 경험률</div>
+        <div style="font-size:17px;color:var(--muted);margin-top:6px;">구조적인 문제</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">14 / 34</div>
+</div>
+
+<!-- ▓▓ 15 SAM ▓▓ -->
+<div class="slide" data-steps="4">
+  <div class="bg-grid"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-orange" style="margin-bottom:18px;">SAM — Serviceable Addressable Market</div>
+      <div class="slide-title">실제로 도달 가능한 핵심 타겟 시장</div>
+    </div>
+    <div class="slide-body" style="align-items:center;gap:80px;">
+      <div class="col-left">
+        <div class="funnel" style="gap:8px;">
+          <div class="funnel-step step" style="width:100%;background:rgba(255,107,43,.12);border:1px solid rgba(255,107,43,.3);color:var(--orange);font-size:20px;">연간 출국자 <strong>2,500만 명</strong></div>
+          <div class="funnel-arrow step">↓ 일본/동남아 50%</div>
+          <div class="funnel-step step" style="width:82%;background:rgba(255,107,43,.18);border:1px solid rgba(255,107,43,.35);color:var(--orange);font-size:20px;"><strong>1,250만 명</strong></div>
+          <div class="funnel-arrow step">↓ 자유여행 80%</div>
+          <div class="funnel-step step" style="width:65%;background:rgba(255,107,43,.25);border:1px solid rgba(255,107,43,.42);color:var(--orange);font-size:20px;"><strong>1,000만 명</strong></div>
+          <div class="funnel-arrow step">↓ 2030 여성 35%</div>
+          <div class="funnel-step step" style="width:48%;background:rgba(255,107,43,.36);border:1px solid rgba(255,107,43,.65);color:var(--orange);font-size:22px;box-shadow:var(--og);"><strong>SAM = 350만 명</strong></div>
+        </div>
+      </div>
+      <div class="col-right step">
+        <div style="font-size:19px;color:var(--muted2);margin-bottom:14px;">이 350만 명이 지금</div>
+        <div style="font-size:24px;font-weight:700;line-height:1.65;">스크린샷과 카톡으로<br>파편화된 정보를 관리하고<br><span class="g-orange">96%가 반복 탐색의 고통을 겪는다</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">15 / 34</div>
+</div>
+
+<!-- ▓▓ 16 SOM ▓▓ -->
+<div class="slide" data-steps="4">
+  <div class="bg-grid"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-orange" style="margin-bottom:18px;">SOM — Serviceable Obtainable Market</div>
+      <div class="slide-title">1차로 실제 확보 가능한 규모</div>
+    </div>
+    <div class="slide-body" style="align-items:center;">
+      <div class="col-left" style="display:flex;flex-direction:column;gap:22px;">
+        <div class="step" style="font-size:20px;color:var(--text);line-height:2.2;">SAM <span class="g-orange">350만</span> × 채널 접근성 <span class="g-blue">1%</span> = <span style="color:var(--text);">3.5만 명</span></div>
+        <div class="step" style="font-size:20px;color:var(--text);">3.5만 × 전환율 <span class="g-green">35%</span> =</div>
+        <div class="step">
+          <div class="big-stat g-blue" style="font-size:120px;">12,250명</div>
+          <div class="bs-label">설문 이메일 등록 의향 35% 근거</div>
+        </div>
+      </div>
+      <div class="col-right" style="display:flex;flex-direction:column;gap:16px;">
+        <div style="font-size:18px;color:var(--muted2);margin-bottom:6px;">SOM 실험 계획</div>
+        <div class="sc step" style="border-color:var(--blue);">
+          <div class="sc-num g-blue">1</div>
+          <div class="sc-text">이메일 수집 → MVP 체험 유도</div>
+        </div>
+        <div class="sc step" style="border-color:var(--green);">
+          <div class="sc-num g-green">2</div>
+          <div class="sc-text">체크리스트 생성 후 완주율 확인</div>
+        </div>
+        <div class="sc step" style="border-color:var(--yellow);">
+          <div class="sc-num g-yellow">3</div>
+          <div class="sc-text">유료 결제 버튼 클릭률 — 지불 의사 검증</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">16 / 34</div>
+</div>
+
+<!-- ▓▓ 17 TAM ▓▓ -->
+<div class="slide" data-steps="3">
+  <div class="bg-grid"></div>
+  <div class="bg-spot" style="width:550px;height:550px;background:var(--purple);top:50%;left:32%;transform:translate(-50%,-50%);opacity:.07;filter:blur(130px);"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-orange" style="margin-bottom:18px;">TAM — Total Addressable Market</div>
+      <div class="slide-title">궁극적으로 공략할 전체 시장</div>
+    </div>
+    <div class="slide-body" style="align-items:center;justify-content:space-between;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:22px;">
+        <div class="step">
+          <div style="font-size:19px;color:var(--muted2);margin-bottom:14px;">전체 출국자 2,500만 × 자유여행 70% × 지불 의사 2,000원</div>
+          <div class="big-stat g-purple" style="font-size:130px;line-height:1;">350억 원</div>
+          <div class="bs-label">연간 매출 상한선 기준</div>
+        </div>
+        <div class="step">
+          <div class="bubbles" style="gap:32px;">
+            <div class="bub" style="width:210px;height:210px;background:rgba(168,85,247,.12);border:2px solid rgba(168,85,247,.38);box-shadow:var(--pg);">
+              <div class="bub-val g-purple" style="font-size:24px;">350억</div>
+              <div class="bub-lbl" style="font-size:16px;">TAM</div>
+            </div>
+            <div class="bub" style="width:138px;height:138px;background:rgba(255,107,43,.12);border:2px solid rgba(255,107,43,.38);">
+              <div class="bub-val g-orange" style="font-size:17px;">350만</div>
+              <div class="bub-lbl" style="font-size:13px;">SAM</div>
+            </div>
+            <div class="bub" style="width:90px;height:90px;background:rgba(56,182,255,.12);border:2px solid rgba(56,182,255,.38);">
+              <div class="bub-val g-blue" style="font-size:13px;">1.2만</div>
+              <div class="bub-lbl" style="font-size:11px;">SOM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="step" style="max-width:420px;">
+        <div style="padding:30px 36px;background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.22);border-radius:14px;">
+          <div style="font-size:17px;color:var(--muted2);margin-bottom:14px;">비전</div>
+          <div style="font-size:22px;font-weight:700;line-height:1.75;color:var(--text);">일본/동남아를 넘어<br>전 세계 자유여행자의 준비 과정을<br><span class="g-purple">"탐색 중심"</span>에서<br><span class="g-green">"생성/확인 중심"</span>으로</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">17 / 34</div>
+</div>
+
+<!-- ▓▓ 18 시장조사 요약 ▓▓ -->
+<div class="slide" data-steps="2">
+  <div class="bg-grid"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner" style="justify-content:center;">
+    <div class="slide-header"><div class="slide-title">시장조사 요약</div></div>
+    <div style="display:flex;flex-direction:column;gap:28px;">
+      <div class="step" style="display:flex;gap:40px;justify-content:space-around;">
+        <div style="text-align:center;"><div class="big-stat g-red" style="font-size:100px;">95%</div><div class="bs-label">반복 탐색</div></div>
+        <div style="text-align:center;"><div class="big-stat g-red" style="font-size:100px;">77%</div><div class="bs-label">Backflow</div></div>
+        <div style="text-align:center;"><div class="big-stat g-red" style="font-size:100px;">74%</div><div class="bs-label">실행 포기</div></div>
+        <div style="text-align:center;"><div class="big-stat g-green" style="font-size:100px;">350만</div><div class="bs-label">SAM</div></div>
+        <div style="text-align:center;"><div class="big-stat g-blue" style="font-size:100px;">1.2만</div><div class="bs-label">SOM</div></div>
+        <div style="text-align:center;"><div class="big-stat g-purple" style="font-size:100px;">350억</div><div class="bs-label">TAM</div></div>
+      </div>
+      <div class="step"><div class="quote" style="font-size:22px;text-align:center;">이제 이 문제를 어떻게 <strong>정의</strong>하고 <strong>측정</strong>할 건지 — PDD</div></div>
+    </div>
+  </div>
+  <div class="slide-num">18 / 34</div>
+</div>
+
+<!-- ▓▓ 19 PDD — 직선 퍼널 X ▓▓ -->
+<div class="slide" data-steps="3">
+  <div class="bg-grid"></div>
+  <div class="bg-spot" style="width:520px;height:520px;background:var(--yellow);top:50%;right:-80px;opacity:.06;filter:blur(140px);"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-yellow" style="margin-bottom:18px;">PART 02 · PDD</div>
+      <div class="slide-title">단순한 직선 퍼널이 아니다</div>
+    </div>
+    <div class="slide-body" style="align-items:center;gap:60px;">
+      <div class="step" style="flex:1;text-align:center;">
+        <div style="font-size:18px;color:var(--muted2);margin-bottom:18px;">기존 퍼널</div>
+        <div class="flow" style="justify-content:center;opacity:.4;">
+          <div class="fn" style="background:rgba(255,255,255,.06);border:1px solid var(--border);">검색</div>
+          <div class="fa">→</div>
+          <div class="fn" style="background:rgba(255,255,255,.06);border:1px solid var(--border);">구매</div>
+        </div>
+        <div style="font-size:60px;color:var(--red);margin-top:18px;text-shadow:var(--rg);">✕</div>
+      </div>
+      <div style="width:1px;height:220px;background:var(--border);flex-shrink:0;"></div>
+      <div class="step" style="flex:1;text-align:center;">
+        <div style="font-size:18px;color:var(--muted2);margin-bottom:18px;">여행 준비 실제 구조</div>
+        <div style="font-size:34px;font-weight:800;line-height:1.8;color:var(--yellow);text-shadow:var(--yg);">반복된다<br>역류한다<br>멈췄다 재시작한다</div>
+      </div>
+      <div class="step" style="flex:1.2;">
+        <div style="padding:28px 32px;background:rgba(245,200,66,.06);border:1px solid rgba(245,200,66,.25);border-radius:14px;">
+          <div style="font-size:19px;color:var(--muted2);margin-bottom:14px;">그래서 저희는</div>
+          <div class="g-yellow" style="font-size:34px;font-weight:900;line-height:1.3;">행동 구조를<br>3개의 루프로 정의</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">19 / 34</div>
+</div>
+
+<!-- ▓▓ 20 3 루프 다이어그램 ▓▓ -->
+<div class="slide" data-steps="4">
+  <div class="bg-grid"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-yellow" style="margin-bottom:18px;">행동 흐름 정의</div>
+      <div class="slide-title">3개 루프 구조</div>
+    </div>
+    <div class="loop-diagram" style="gap:20px;">
+      <div class="loop-row step" style="border-color:rgba(245,200,66,.3);background:rgba(245,200,66,.04);padding:22px 28px;">
+        <div class="loop-label g-yellow">TOTAL LOOP</div>
+        <div class="loop-flow">
+          <div class="lf-node" style="background:rgba(245,200,66,.15);color:var(--yellow);">Travel Fixed</div>
+          <div class="lf-arrow">→</div>
+          <div class="lf-node" style="background:rgba(255,107,43,.15);color:var(--orange);">[Store Loop]</div>
+          <div class="lf-arrow">→</div>
+          <div class="lf-node" style="background:rgba(56,182,255,.15);color:var(--blue);">[Confirm Loop]</div>
+          <div class="lf-arrow">→</div>
+          <div class="lf-node" style="background:rgba(0,217,163,.15);color:var(--green);">Reuse</div>
+        </div>
+      </div>
+      <div class="loop-row step" style="border-color:rgba(255,107,43,.3);background:rgba(255,107,43,.04);padding:22px 28px;">
+        <div class="loop-label g-orange">STORE LOOP</div>
+        <div class="loop-flow">
+          <div class="lf-node" style="background:rgba(255,107,43,.15);color:var(--orange);">Search</div>
+          <div class="lf-arrow">→</div>
+          <div class="lf-node" style="background:rgba(255,107,43,.15);color:var(--orange);">Detail Check</div>
+          <div class="lf-arrow">→</div>
+          <div class="lf-node" style="background:rgba(255,107,43,.15);color:var(--orange);">Save</div>
+        </div>
+      </div>
+      <div class="loop-row step" style="border-color:rgba(56,182,255,.3);background:rgba(56,182,255,.04);padding:22px 28px;">
+        <div class="loop-label g-blue">CONFIRM LOOP</div>
+        <div class="loop-flow">
+          <div class="lf-node" style="background:rgba(56,182,255,.15);color:var(--blue);">Saved List Open</div>
+          <div class="lf-arrow">→</div>
+          <div class="lf-node" style="background:rgba(56,182,255,.15);color:var(--blue);">Edit</div>
+          <div class="lf-arrow">→</div>
+          <div class="lf-node" style="background:rgba(56,182,255,.15);color:var(--blue);">Prepare Action</div>
+        </div>
+      </div>
+      <div class="loop-row step" style="border-color:rgba(255,71,87,.3);background:rgba(255,71,87,.04);padding:22px 28px;">
+        <div class="loop-label g-red">BACKFLOW (역류)</div>
+        <div class="loop-flow">
+          <div style="font-size:17px;color:var(--text);">Confirm Loop 도중 빠진 항목 발견 →</div>
+          <div class="lf-node" style="background:rgba(255,71,87,.15);color:var(--red);margin-left:8px;">Store Loop 재발동</div>
+          <div style="font-size:16px;color:var(--muted);margin-left:8px;">← 이걸 Backflow라 정의</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">20 / 34</div>
+</div>
+
+<!-- ▓▓ 21 핵심 지표 ▓▓ -->
+<div class="slide" data-steps="3">
+  <div class="bg-grid"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-yellow" style="margin-bottom:18px;">측정 지표 체계</div>
+      <div class="slide-title">각 루프를 수치화한다</div>
+    </div>
+    <div class="slide-body">
+      <div class="col-left">
+        <div style="font-size:14px;font-weight:700;color:var(--orange);letter-spacing:.12em;margin-bottom:18px;">STORE LOOP 지표</div>
+        <div class="metric-grid step">
+          <div class="mg"><div class="mg-name">SP1</div><div class="mg-desc g-orange">Search → Detail Check 비율</div></div>
+          <div class="mg"><div class="mg-name">SP2</div><div class="mg-desc g-orange">Detail Check → Save 비율</div></div>
+          <div class="mg"><div class="mg-name">Store_LCP</div><div class="mg-desc">SP1 × SP2 (완성 확률)</div></div>
+          <div class="mg"><div class="mg-name">Store_R</div><div class="mg-desc">재탐색 비율</div></div>
+          <div class="mg"><div class="mg-name">Delay_t</div><div class="mg-desc">탐색→저장 소요 시간</div></div>
+          <div class="mg"><div class="mg-name">Store_LSI</div><div class="mg-desc">Store_LCP × (1 − PB_t)</div></div>
+        </div>
+      </div>
+      <div class="col-right">
+        <div style="font-size:14px;font-weight:700;color:var(--blue);letter-spacing:.12em;margin-bottom:18px;">CONFIRM LOOP 지표</div>
+        <div class="metric-grid step">
+          <div class="mg"><div class="mg-name">CP1</div><div class="mg-desc g-blue">Open → Edit 비율</div></div>
+          <div class="mg"><div class="mg-name">CP2</div><div class="mg-desc g-blue">Edit → Prepare Action 비율</div></div>
+          <div class="mg"><div class="mg-name">Confirm_LCP</div><div class="mg-desc">CP1 × CP2 (완성 확률)</div></div>
+          <div class="mg"><div class="mg-name">Backflow</div><div class="mg-desc">Confirm 도중 재발동 비율</div></div>
+        </div>
+        <div class="step" style="margin-top:18px;padding:18px 24px;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.25);border-radius:10px;">
+          <div style="font-size:13px;font-weight:700;color:var(--purple);margin-bottom:8px;letter-spacing:.1em;">TOTAL LOOP</div>
+          <div style="font-size:17px;color:var(--text);line-height:2;">Total_LCP = Store_LCP × Confirm_LCP</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">21 / 34</div>
+</div>
+
+<!-- ▓▓ 22 수식 PB_t ▓▓ -->
+<div class="slide" data-steps="2">
+  <div class="bg-grid"></div>
+  <div class="bg-spot" style="width:520px;height:520px;background:var(--purple);top:50%;left:50%;transform:translate(-50%,-50%);opacity:.06;filter:blur(140px);"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner" style="justify-content:center;">
+    <div class="slide-header">
+      <div class="part-badge pb-yellow" style="margin-bottom:18px;">준비 부담도 (PB_t)</div>
+      <div class="slide-title">여행 준비의 피로를 하나의 수식으로</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:30px;">
+      <div class="formula step">
+        PB<sub style="font-size:14px;">t</sub> = α · Store_R<sub style="font-size:14px;">t</sub> + β · IG<sub style="font-size:14px;">t</sub> + γ · Delay<sub style="font-size:14px;">t</sub><br><br>
+        <span style="color:var(--blue);font-size:18px;font-weight:600;">Total_LSI = Total_LCP × (1 − λ₁·Store_R − λ₂·Backflow)</span>
+      </div>
+      <div class="step" style="display:flex;gap:20px;">
+        <div class="mg" style="flex:1;"><div class="mg-name">Store_R↑</div><div class="mg-desc">재탐색 비율 높을수록</div></div>
+        <div class="mg" style="flex:1;"><div class="mg-name">IG_t↑</div><div class="mg-desc">빠진 항목 발견 비율 높을수록</div></div>
+        <div class="mg" style="flex:1;"><div class="mg-name">Delay_t↑</div><div class="mg-desc">저장까지 시간 오래 걸릴수록</div></div>
+        <div style="display:flex;align-items:center;font-size:26px;color:var(--muted);">→</div>
+        <div class="mg" style="flex:1;background:rgba(255,71,87,.07);border-color:rgba(255,71,87,.22);"><div class="mg-name g-red">PB_t↑</div><div class="mg-desc g-red">준비 부담 증가</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">22 / 34</div>
+</div>
+
+<!-- ▓▓ 23 SED 개요 ▓▓ -->
+<div class="slide" data-steps="1">
+  <div class="bg-grid"></div>
+  <div class="bg-spot" style="width:520px;height:520px;background:var(--green);top:50%;right:120px;opacity:.06;filter:blur(140px);"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner" style="justify-content:center;">
+    <div class="step" style="text-align:center;">
+      <div class="part-badge pb-green" style="margin-bottom:26px;">PART 03 · SED</div>
+      <div style="font-size:68px;font-weight:900;line-height:1.2;letter-spacing:-.025em;">Solution Exploration<br><span class="g-green">Document</span></div>
+      <div style="font-size:24px;color:var(--muted2);margin-top:26px;font-weight:300;">루프별 문제에 대한 해결안 아이디어 정리</div>
+      <div style="display:flex;justify-content:center;gap:24px;margin-top:38px;">
+        <div class="part-badge pb-orange" style="font-size:14px;">Store Loop</div>
+        <div class="part-badge pb-blue" style="font-size:14px;">Confirm Loop</div>
+        <div class="part-badge pb-green" style="font-size:14px;">Total Loop</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">23 / 34</div>
+</div>
+
+<!-- ▓▓ 24 SED-1 문제 ▓▓ -->
+<div class="slide" data-steps="2">
+  <div class="bg-grid"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-green" style="margin-bottom:18px;">SED-1 · Store Loop 문제</div>
+      <div class="slide-title">탐색은 하는데, 저장으로 연결이 안 된다</div>
+    </div>
+    <div class="slide-body" style="align-items:center;gap:60px;">
+      <div class="col-left" style="display:flex;flex-direction:column;gap:22px;">
+        <div class="step" style="padding:28px 32px;background:rgba(255,71,87,.06);border:1px solid rgba(255,71,87,.2);border-radius:12px;">
+          <div style="font-size:16px;color:var(--muted2);margin-bottom:10px;">문제 ①</div>
+          <div style="font-size:21px;font-weight:600;line-height:1.55;">구조화되지 않은 정보<br>→ 필요한 내용을 <span class="g-red">한 번에 확보 불가</span></div>
+        </div>
+        <div class="step" style="padding:28px 32px;background:rgba(255,71,87,.06);border:1px solid rgba(255,71,87,.2);border-radius:12px;">
+          <div style="font-size:16px;color:var(--muted2);margin-bottom:10px;">문제 ②</div>
+          <div style="font-size:21px;font-weight:600;line-height:1.55;">Detail Check 이후에도<br>→ 바로 저장으로 <span class="g-red">이어지지 않음</span></div>
+        </div>
+      </div>
+      <div class="col-right step">
+        <div class="flow" style="flex-direction:column;gap:10px;align-items:center;">
+          <div class="fn" style="width:100%;justify-content:center;background:rgba(255,107,43,.12);border:1px solid rgba(255,107,43,.3);color:var(--orange);font-size:19px;padding:14px 22px;">Search</div>
+          <div style="text-align:center;color:var(--red);font-size:24px;">↓ <span style="font-size:16px;">마찰</span></div>
+          <div class="fn" style="width:100%;justify-content:center;background:rgba(255,107,43,.12);border:1px solid rgba(255,107,43,.3);color:var(--orange);font-size:19px;padding:14px 22px;">Detail Check</div>
+          <div style="text-align:center;color:var(--red);font-size:24px;">↓ <span style="font-size:16px;">마찰</span></div>
+          <div class="fn" style="width:100%;justify-content:center;background:rgba(255,107,43,.12);border:1px solid rgba(255,107,43,.3);color:var(--orange);font-size:19px;padding:14px 22px;">Save</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">24 / 34</div>
+</div>
+
+<!-- ▓▓ 25 SED-1 해결안 ▓▓ -->
+<div class="slide" data-steps="3">
+  <div class="bg-grid"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-green" style="margin-bottom:18px;">SED-1 · Store Loop 해결안</div>
+      <div class="slide-title">3가지 아이디어로 전환 마찰 해소</div>
+    </div>
+    <div class="step-cards col-full" style="gap:18px;">
+      <div class="sc step" style="border-color:var(--orange);padding:24px 30px;">
+        <div class="sc-num g-orange">01</div>
+        <div><div class="sc-text"><strong>맞춤형 준비 항목 추천</strong> — SP1 개선</div><div class="sc-sub">여행 조건 필터 기반 맞춤형 탐색 결과 제공 → Store_R · PB_t 감소, SP1 증가</div></div>
+      </div>
+      <div class="sc step" style="border-color:var(--green);padding:24px 30px;">
+        <div class="sc-num g-green">02</div>
+        <div><div class="sc-text"><strong>즉시 저장 가능한 체크리스트 구조</strong> — SP2 개선</div><div class="sc-sub">최소한의 클릭으로 찾은 정보를 바로 저장 → Delay_t · PB_t 감소, SP2 증가</div></div>
+      </div>
+      <div class="sc step" style="border-color:var(--blue);padding:24px 30px;">
+        <div class="sc-num g-blue">03</div>
+        <div><div class="sc-text"><strong>탐색 결과 구조화하여 제공</strong> — Detail Check 개선</div><div class="sc-sub">사용자 조건에 맞는 구조화된 항목 제공 → Store_R · Delay_t 감소, SP2 증가</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">25 / 34</div>
+</div>
+
+<!-- ▓▓ 26 SED-2 Confirm ▓▓ -->
+<div class="slide" data-steps="3">
+  <div class="bg-grid"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-green" style="margin-bottom:18px;">SED-2 · Confirm Loop 해결안 선택</div>
+      <div class="slide-title">MVP에서 무엇을 채택하고 무엇을 배제했나</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:18px;flex:1;">
+      <div class="compare" style="gap:22px;">
+        <div class="cmp cmp-adopt step" style="flex:1.2;padding:28px 30px;">
+          <div class="cmp-title g-green">✔ 채택 — MVP 포함</div>
+          <div style="font-size:20px;font-weight:700;line-height:2.2;">카테고리 기반 확인 구조<br><span style="font-size:16px;font-weight:400;color:var(--muted2);">준비물 / 예약 / 출국 전 확인사항 카테고리 분류<br>비구조적 확인 행동 감소 → CP1 개선</span></div>
+        </div>
+        <div class="cmp cmp-reject step" style="flex:2;padding:28px 30px;">
+          <div class="cmp-title" style="color:var(--muted);">✕ MVP 배제 — 이유 있는 선택</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+            <div class="cmp-item"><span style="text-decoration:line-through;">실행 순서 중심 체크리스트</span> <span style="font-size:15px;">— 카테고리보다 우선순위 낮음, 추후 실험</span></div>
+            <div class="cmp-item"><span style="text-decoration:line-through;">누락 항목 추천</span> <span style="font-size:15px;">— 초기 데이터 부족, 알고리즘 구현 불가</span></div>
+            <div class="cmp-item"><span style="text-decoration:line-through;">휴지통 기능</span> <span style="font-size:15px;">— Backflow 포착 시 2사이클에서 추가</span></div>
+            <div class="cmp-item"><span style="text-decoration:line-through;">준비 완료 체크 강화</span> <span style="font-size:15px;">— 초기 행동 구조 파악이 우선</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="step" style="padding:18px 24px;background:rgba(56,182,255,.06);border-left:4px solid var(--blue);border-radius:0 10px 10px 0;font-size:17px;color:var(--muted2);">
+        가설 폐기 기준: Edit 발생률 ≤30% / Prepare Action 발생률 ≤20% / 카테고리별 점검 진입률 ≤50%
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">26 / 34</div>
+</div>
+
+<!-- ▓▓ 27 SED-3 Total ▓▓ -->
+<div class="slide" data-steps="3">
+  <div class="bg-grid"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-green" style="margin-bottom:18px;">SED-3 · Total Loop 해결안</div>
+      <div class="slide-title">루프 전체의 연결성과 안정성</div>
+    </div>
+    <div class="slide-body" style="align-items:flex-start;gap:26px;">
+      <div class="col-left" style="display:flex;flex-direction:column;gap:18px;">
+        <div class="sc step" style="border-color:var(--green);padding:24px 30px;">
+          <div class="sc-num g-green">✔</div>
+          <div><div class="sc-text"><strong>준비 시작 진입 구조</strong></div><div class="sc-sub">Travel Fixed 직후 체크리스트 생성 바로 시작 → 초기 진입 마찰 감소 → Store_LCP 증가</div></div>
+        </div>
+        <div class="sc step" style="border-color:var(--blue);padding:24px 30px;">
+          <div class="sc-num g-blue">✔</div>
+          <div><div class="sc-text"><strong>진행도 시각화</strong></div><div class="sc-sub">현재 어디까지 준비했는지 한눈에 파악 → 반복 확인 감소, Backflow 감소</div></div>
+        </div>
+      </div>
+      <div class="col-right" style="display:flex;flex-direction:column;gap:14px;">
+        <div class="cmp cmp-reject step" style="padding:22px 28px;">
+          <div class="cmp-title">✕ 배제</div>
+          <div class="cmp-item"><span style="text-decoration:line-through;">저장·확인 루프 동시 수행</span> — 데이터 노이즈 우려</div>
+          <div class="cmp-item"><span style="text-decoration:line-through;">Reuse 동기 설계</span> — 1차 루프 연결성 관찰 목표 흐려짐</div>
+        </div>
+        <div class="step" style="padding:24px 28px;background:rgba(56,182,255,.06);border-left:4px solid var(--blue);border-radius:0 10px 10px 0;font-size:18px;line-height:1.8;">
+          <span class="g-blue" style="font-size:14px;font-weight:700;letter-spacing:.1em;display:block;margin-bottom:10px;">핵심 원칙</span>
+          "초기에는 코호트 같은 장기 지표보다<br><strong>초기 진입 여부에 집중</strong>한다"
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">27 / 34</div>
+</div>
+
+<!-- ▓▓ 28 DRD 개요 ▓▓ -->
+<div class="slide" data-steps="1">
+  <div class="bg-grid"></div>
+  <div class="bg-spot" style="width:520px;height:520px;background:var(--blue);top:50%;right:180px;opacity:.07;filter:blur(140px);"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner" style="justify-content:center;">
+    <div class="step" style="text-align:center;">
+      <div class="part-badge pb-blue" style="margin-bottom:26px;">PART 04 · DRD</div>
+      <div style="font-size:68px;font-weight:900;line-height:1.2;letter-spacing:-.025em;">Decision Record<br><span class="g-blue">Document</span></div>
+      <div style="font-size:24px;color:var(--muted2);margin-top:26px;font-weight:300;">SED 해결안 중 실제로 채택·배제한 결정 로그<br>무엇을 왜 선택했고, 무엇을 왜 배제했는가</div>
+    </div>
+  </div>
+  <div class="slide-num">28 / 34</div>
+</div>
+
+<!-- ▓▓ 29 DRD-1 Store Loop ▓▓ -->
+<div class="slide" data-steps="3">
+  <div class="bg-grid"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-blue" style="margin-bottom:18px;">결정로그 1 · Store Loop</div>
+      <div class="slide-title">3가지 전부 채택 — 동시에 전환 마찰 낮추기</div>
+    </div>
+    <div class="slide-body" style="align-items:flex-start;">
+      <div class="col-left" style="display:flex;flex-direction:column;gap:16px;">
+        <div class="sc step" style="border-color:var(--green);padding:22px 28px;">
+          <div class="sc-num g-green">✔</div>
+          <div><div class="sc-text">사용자 필터 맞춤형 준비 항목 추천</div><div class="sc-sub g-orange">→ SP1 개선</div></div>
+        </div>
+        <div class="sc step" style="border-color:var(--green);padding:22px 28px;">
+          <div class="sc-num g-green">✔</div>
+          <div><div class="sc-text">구조화된 탐색 결과 제공</div><div class="sc-sub" style="color:var(--orange);">→ Store_R 감소</div></div>
+        </div>
+        <div class="sc step" style="border-color:var(--green);padding:22px 28px;">
+          <div class="sc-num g-green">✔</div>
+          <div><div class="sc-text">즉시 저장 가능한 체크리스트 구조</div><div class="sc-sub g-orange">→ SP2 · Delay_t 개선</div></div>
+        </div>
+      </div>
+      <div class="col-right step">
+        <div style="padding:28px 32px;background:rgba(255,71,87,.06);border:1px solid rgba(255,71,87,.2);border-radius:12px;">
+          <div style="font-size:14px;font-weight:700;color:var(--muted);margin-bottom:14px;letter-spacing:.1em;">가설 폐기 기준</div>
+          <div style="font-size:18px;color:var(--muted2);line-height:2.4;">첫 Detail Check 발생률 <span class="g-red">&lt; 50%</span><br>첫 Save 발생률 <span class="g-red">&lt; 50%</span><br>각 전환 시간 <span class="g-red">&gt; 60초</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">29 / 34</div>
+</div>
+
+<!-- ▓▓ 30 DRD-2 Confirm ▓▓ -->
+<div class="slide" data-steps="3">
+  <div class="bg-grid"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-blue" style="margin-bottom:18px;">결정로그 2 · Confirm Loop</div>
+      <div class="slide-title">카테고리 기반 확인 구조 단독 채택</div>
+    </div>
+    <div class="slide-body" style="align-items:flex-start;">
+      <div class="col-left">
+        <div class="compare" style="flex-direction:column;gap:16px;">
+          <div class="cmp cmp-adopt step" style="padding:26px 30px;">
+            <div class="cmp-title g-green">✔ 채택</div>
+            <div style="font-size:21px;font-weight:700;color:var(--text);">카테고리 기반 확인 구조</div>
+            <div style="font-size:16px;color:var(--muted2);margin-top:8px;">CP1 개선 / Backflow 감소 / Confirm_LSI 향상</div>
+          </div>
+          <div class="cmp cmp-reject step" style="padding:26px 30px;">
+            <div class="cmp-title">✕ 배제 이유</div>
+            <div style="font-size:16px;line-height:2.3;color:var(--muted2);">
+              누락 항목 추천 — <span style="color:var(--text);">초기 데이터 부족, 알고리즘 구현 어려움</span><br>
+              휴지통 기능 — <span style="color:var(--text);">Backflow 포착 후 2사이클에서 추가</span><br>
+              준비 완료 체크 강화 — <span style="color:var(--text);">초기 행동 구조 파악 우선</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-right step">
+        <div style="padding:28px 32px;background:rgba(255,71,87,.06);border:1px solid rgba(255,71,87,.2);border-radius:12px;">
+          <div style="font-size:14px;font-weight:700;color:var(--muted);margin-bottom:14px;letter-spacing:.1em;">가설 폐기 기준</div>
+          <div style="font-size:18px;color:var(--muted2);line-height:2.6;">Edit 발생률 <span class="g-red">≤ 30%</span><br>Prepare Action 발생률 <span class="g-red">≤ 20%</span><br>카테고리별 점검 진입률 <span class="g-red">≤ 50%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">30 / 34</div>
+</div>
+
+<!-- ▓▓ 31 DRD-3 Total ▓▓ -->
+<div class="slide" data-steps="3">
+  <div class="bg-grid"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-blue" style="margin-bottom:18px;">결정로그 3 · Total Loop</div>
+      <div class="slide-title">루프 연결성 안정화에 집중</div>
+    </div>
+    <div class="slide-body" style="align-items:flex-start;">
+      <div class="col-left" style="display:flex;flex-direction:column;gap:16px;">
+        <div class="sc step" style="border-color:var(--green);padding:22px 28px;">
+          <div class="sc-num g-green">✔</div>
+          <div><div class="sc-text">준비 시작 진입 구조 도입</div><div class="sc-sub">Travel Fixed → Store Loop 마찰 감소</div></div>
+        </div>
+        <div class="sc step" style="border-color:var(--green);padding:22px 28px;">
+          <div class="sc-num g-green">✔</div>
+          <div><div class="sc-text">진행도 시각화</div><div class="sc-sub">Confirm Loop 진입률 향상 · Backflow 감소</div></div>
+        </div>
+        <div class="cmp cmp-reject step" style="margin-top:6px;padding:22px 28px;">
+          <div class="cmp-title">✕ 배제</div>
+          <div class="cmp-item"><span style="text-decoration:line-through;">저장·확인 루프 동시 수행</span></div>
+          <div class="cmp-item"><span style="text-decoration:line-through;">Reuse 동기 설계</span></div>
+        </div>
+      </div>
+      <div class="col-right step">
+        <div style="padding:30px 36px;background:rgba(56,182,255,.06);border-left:4px solid var(--blue);border-radius:0 14px 14px 0;font-size:20px;line-height:1.9;color:var(--text);">
+          <span class="g-blue" style="font-size:14px;font-weight:700;letter-spacing:.12em;display:block;margin-bottom:14px;">핵심 원칙</span>
+          "초기에는 <strong>지속성 측정</strong>이 어렵기 때문에<br>코호트 분석보다<br><span class="g-blue">초기 진입 여부</span>를 보는 것에<br>집중해야 한다"
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">31 / 34</div>
+</div>
+
+<!-- ▓▓ 32 OKR Meta + Strategic ▓▓ -->
+<div class="slide" data-steps="3">
+  <div class="bg-grid"></div>
+  <div class="bg-spot" style="width:440px;height:440px;background:var(--purple);top:50%;left:50%;transform:translate(-50%,-50%);opacity:.06;filter:blur(130px);"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-purple" style="margin-bottom:18px;">PART 05 · OKR — Meta + Strategic</div>
+      <div class="slide-title">목표: 관찰 가능한 상태를 만든다</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:26px;flex:1;">
+      <div class="step" style="padding:22px 30px;background:rgba(168,85,247,.08);border-left:4px solid var(--purple);border-radius:0 12px 12px 0;">
+        <div style="font-size:13px;font-weight:700;color:var(--purple);letter-spacing:.12em;margin-bottom:10px;">META OKR</div>
+        <div style="font-size:22px;font-weight:700;color:var(--text);">"사용자 여행 준비 체크리스트 작성 행동 패턴을 <span class="g-purple">관찰 가능한 상태</span>로 만든다"</div>
+        <div style="font-size:17px;color:var(--muted2);margin-top:10px;">숫자 목표 달성이 아니라, 관찰 가능한 상태 자체가 1차 목표</div>
+      </div>
+      <div class="step">
+        <div style="font-size:14px;font-weight:700;color:var(--muted2);letter-spacing:.12em;margin-bottom:14px;">STRATEGIC OKR</div>
+        <div style="display:flex;gap:18px;">
+          <div style="flex:1;padding:22px 26px;background:rgba(255,107,43,.06);border:1px solid rgba(255,107,43,.2);border-radius:10px;">
+            <div style="font-size:16px;font-weight:700;color:var(--orange);margin-bottom:10px;">Store Loop 전략</div>
+            <div style="font-size:17px;color:var(--text);line-height:1.7;">탐색 → 저장까지 이어지는 행동 구조 형성<br><span style="font-size:15px;color:var(--muted2);">SP1 · SP2 · Store_R 변화 확인</span></div>
+          </div>
+          <div style="flex:1;padding:22px 26px;background:rgba(56,182,255,.06);border:1px solid rgba(56,182,255,.2);border-radius:10px;">
+            <div style="font-size:16px;font-weight:700;color:var(--blue);margin-bottom:10px;">Confirm Loop 전략</div>
+            <div style="font-size:17px;color:var(--text);line-height:1.7;">카테고리 기반 점검·수정 → 준비 행동 연결<br><span style="font-size:15px;color:var(--muted2);">CP1 · CP2 · Backflow 확인</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="step" style="display:flex;gap:14px;flex-wrap:wrap;">
+        <div class="part-badge pb-orange">R1. 단계별 이벤트 전환 데이터 수집</div>
+        <div class="part-badge pb-blue">R2. Store Loop 퍼널별 이벤트</div>
+        <div class="part-badge pb-green">R3. Confirm Loop 퍼널별 이벤트</div>
+        <div class="part-badge pb-purple">R4. 반복 탐색 · 역류 데이터</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">32 / 34</div>
+</div>
+
+<!-- ▓▓ 33 Execution OKR ▓▓ -->
+<div class="slide" data-steps="4">
+  <div class="bg-grid"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="part-badge pb-purple" style="margin-bottom:18px;">Execution OKR — 4단계 실행</div>
+      <div class="slide-title">측정 가능한 실험으로 검증한다</div>
+    </div>
+    <div class="step-cards col-full" style="gap:18px;">
+      <div class="sc step" style="border-color:var(--orange);padding:22px 30px;">
+        <div class="sc-num g-orange">01</div>
+        <div style="width:100%;"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="sc-text"><strong>초기 반응</strong> — 여행 조건 입력 강조 UI 노출 실험</div><div style="font-size:15px;color:var(--muted);">CTR · SS(검색착수율) · SP1</div></div></div>
+      </div>
+      <div class="sc step" style="border-color:var(--blue);padding:22px 30px;">
+        <div class="sc-num g-blue">02</div>
+        <div style="width:100%;"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="sc-text"><strong>그룹 분리</strong> — 로그인 vs 비로그인 사용자 비교</div><div style="font-size:15px;color:var(--muted);">Backflow · 재진입률(리텐션)</div></div></div>
+      </div>
+      <div class="sc step" style="border-color:var(--green);padding:22px 30px;">
+        <div class="sc-num g-green">03</div>
+        <div style="width:100%;"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="sc-text"><strong>지속 행동 유도</strong> — 원클릭 체크리스트 저장 구조 실험</div><div style="font-size:15px;color:var(--muted);">CVR · 저장 여부 · SP2</div></div></div>
+      </div>
+      <div class="sc step" style="border-color:var(--purple);padding:22px 30px;">
+        <div class="sc-num g-purple">04</div>
+        <div style="width:100%;"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="sc-text"><strong>재진입 유도</strong> — '내 체크리스트' UI · 편집 기능 실험</div><div style="font-size:15px;color:var(--muted);">CP1 · CP2 · Edit 세부 행동</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">33 / 34</div>
+</div>
+
+<!-- ▓▓ 34 클로징 ▓▓ -->
+<div class="slide" data-steps="3">
+  <div class="bg-grid"></div>
+  <div class="bg-spot" style="width:750px;height:750px;background:var(--orange);top:50%;left:50%;transform:translate(-50%,-50%);opacity:.07;filter:blur(160px);"></div>
+  <div class="top-bar"><div class="top-bar-fill"></div></div>
+  <div class="slide-inner" style="justify-content:center;">
+    <div style="display:flex;flex-direction:column;gap:36px;width:100%;">
+      <div class="step" style="display:flex;gap:40px;justify-content:center;">
+        <div style="text-align:center;"><div class="big-stat g-red" style="font-size:110px;">95%</div><div class="bs-label">반복 탐색</div></div>
+        <div style="text-align:center;"><div class="big-stat g-red" style="font-size:110px;">77%</div><div class="bs-label">Backflow</div></div>
+        <div style="text-align:center;"><div class="big-stat g-red" style="font-size:110px;">74%</div><div class="bs-label">실행 포기</div></div>
+      </div>
+      <div class="step" style="text-align:center;">
+        <div style="font-size:38px;font-weight:900;line-height:1.45;letter-spacing:-.015em;">단순한 정보 제공이 아닌,<br><span class="g-orange">저장 루프와 확인 루프가 안정적으로 연결되는<br>행동 구조</span>를 만든다</div>
+      </div>
+      <div class="step" style="text-align:center;">
+        <div style="font-size:20px;color:var(--muted2);line-height:1.9;">측정 가능한 구조로 문제를 다루고 · 폐기 기준을 사전에 설정하고 · 잘못된 방향이면 빠르게 피벗한다</div>
+        <div style="font-size:64px;font-weight:900;color:var(--text);margin-top:28px;letter-spacing:-.025em;">감사합니다</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">34 / 34</div>
+</div>
+
+</div><!-- /deck -->
+
+<div class="nav">
+  <button class="nav-btn" id="prevBtn">◀</button>
+  <div class="nav-counter" id="counter">1 / 34</div>
+  <div class="nav-progress"><div class="nav-progress-fill" id="progressFill"></div></div>
+  <button class="nav-btn" id="nextBtn">▶</button>
+</div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),total=slides.length;
+let cur=0,stepIdx=0;
+function getSteps(el){return Array.from(el.querySelectorAll('.step'));}
+function showSlide(n){
+  slides[cur].classList.remove('active');
+  cur=(n+total)%total; stepIdx=0;
+  const sl=slides[cur];
+  sl.classList.add('active');
+  getSteps(sl).forEach(s=>s.classList.remove('show'));
+  updateNav(); animateBars(sl);
+}
+function revealNext(){
+  const steps=getSteps(slides[cur]);
+  if(stepIdx<steps.length){steps[stepIdx].classList.add('show');stepIdx++;return true;}
+  return false;
+}
+function revealAll(){
+  const steps=getSteps(slides[cur]);
+  steps.forEach(s=>s.classList.add('show'));stepIdx=steps.length;
+}
+function updateNav(){
+  document.getElementById('counter').textContent=(cur+1)+' / '+total;
+  document.getElementById('progressFill').style.width=((cur+1)/total*100)+'%';
+  slides.forEach((s,i)=>{const b=s.querySelector('.top-bar-fill');if(b)b.style.width=((i+1)/total*100)+'%';});
+}
+function animateBars(slide){
+  slide.querySelectorAll('.bar-fill').forEach(bar=>{
+    bar.style.width='0';
+    const p=bar.dataset.pct;
+    if(p)setTimeout(()=>{bar.style.width=p+'%';},220);
+  });
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){
+    e.preventDefault();if(!revealNext()){showSlide(cur+1);revealNext();}
+  }else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){
+    e.preventDefault();showSlide(cur-1);revealAll();
+  }else if(e.key==='Home'){showSlide(0);revealNext();}
+  else if(e.key==='End'){showSlide(total-1);revealAll();}
+  else if(e.key==='f'||e.key==='F'){
+    if(!document.fullscreenElement)document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
+  }
+});
+document.getElementById('nextBtn').addEventListener('click',()=>{if(!revealNext()){showSlide(cur+1);revealNext();}});
+document.getElementById('prevBtn').addEventListener('click',()=>{showSlide(cur-1);revealAll();});
+function scaleToFit(){
+  const d=document.getElementById('deck');
+  const sx=window.innerWidth/1920,sy=window.innerHeight/1080,sc=Math.min(sx,sy);
+  d.style.transform=`scale(${sc})`;d.style.transformOrigin='top left';
+  d.style.position='fixed';
+  d.style.top=((window.innerHeight-1080*sc)/2)+'px';
+  d.style.left=((window.innerWidth-1920*sc)/2)+'px';
+}
+window.addEventListener('resize',scaleToFit);scaleToFit();
+showSlide(0);revealNext();
+</script>
+</body>
+</html>
